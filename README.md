@@ -17,6 +17,7 @@ Everything here is free!
 2. **Programming with Mosh** - 3-hour course - https://www.youtube.com/watch?v=7S_tz1z_5bA&t=44s
 3. **freeCodeCamp** - 4-hour course - https://www.youtube.com/watch?v=HXV3zeQKqGY&t=12282s
 4. **Edureka** - 4-hour tutorial - https://www.youtube.com/watch?v=BPHAr4QGGVE
+5.  **Learn SQL in a simplified manner** - https://www.udemy.com/course/learn-sql-in-a-simplified-manner/
 
 ***
 
