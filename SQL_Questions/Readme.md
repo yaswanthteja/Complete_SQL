@@ -1,4 +1,4 @@
-## Basic Sql Questions
+# Basic Sql Questions
 
 ## 1 What is SQL?
 
