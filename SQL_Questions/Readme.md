@@ -37,4 +37,21 @@ The advantages of views are:
 - Security
 - Maintainability
 
+## 6.What are MySQL Triggers?
+A trigger is a task that executes in response to some predefined database event, such as after a new row is added to a particular table. Specifically, this event involves inserting, modifying, or deleting table data, and the task can occur either prior to or immediately following any such event. 
+Triggers have many purposes, including:
+
+- Audit Trails
+- Validation
+- Referential integrity enforcement
+ ## 7. How many Triggers are possible in MySQL?
+ There are six Triggers allowed to use in the MySQL database:
+
+- Before Insert
+- After Insert
+- Before Update
+- After Update
+- Before Delete
+- After Delete
+
 
