@@ -29,4 +29,12 @@ through a programming language
 #3 5. What are MySQL Database Queries?
 A query is a specific request or a question. One can query a database for specific information and have a record returned.
 
+## 5.What are MySQL “Views”?
+In MySQL, a view consists of a set of rows that is returned if a particular query is executed. This is also known as a ‘virtual table’. Views make it easy to retrieve the way of making the query available via an alias. 
+The advantages of views are:
+
+- Simplicity
+- Security
+- Maintainability
+
 
