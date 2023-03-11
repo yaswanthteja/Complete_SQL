@@ -15,3 +15,18 @@ MySQL is an Oracle-supported Relational Database Management System (RDBMS) based
 ## 2) What are tables in SQL?
 
 The table is a collection of records and information in a single view.
+
+
+## 3. What does a MySQL database contain?
+A MySQL database contains one or more tables, each of which contains records or rows. Within these rows are various columns or fields that contain the data itself.
+
+## 4. How can you interact with MySQL?
+There are three main ways you can interact with MySQL: 
+
+using a command line
+via a web interface
+through a programming language
+#3 5. What are MySQL Database Queries?
+A query is a specific request or a question. One can query a database for specific information and have a record returned.
+
+
