@@ -103,3 +103,29 @@ PRIMARY KEY (ID, FirstName);
 
 ## 9. What is a UNIQUE constraint?
 A UNIQUE constraint ensures that all values in a column are different. This provides uniqueness for the column(s) and helps identify each row uniquely. Unlike primary key, there can be multiple unique constraints defined per table. The code syntax for UNIQUE is quite similar to that of PRIMARY KEY and can be used interchangeably.
+
+```
+CREATE TABLE Students (   /* Create table with a single field as unique */
+   ID INT NOT NULL UNIQUE
+   Name VARCHAR(255)
+);
+
+CREATE TABLE Students (   /* Create table with multiple fields as unique */
+   ID INT NOT NULL
+   LastName VARCHAR(255)
+   FirstName VARCHAR(255) NOT NULL
+   CONSTRAINT PK_Student
+   UNIQUE (ID, FirstName)
+);
+
+ALTER TABLE Students   /* Set a column as unique */
+ADD UNIQUE (ID);
+ALTER TABLE Students   /* Set multiple columns as unique */
+ADD CONSTRAINT PK_Student   /* Naming a unique constraint */
+UNIQUE (ID, FirstName);
+
+```
+
+
+
+
