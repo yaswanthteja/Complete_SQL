@@ -125,7 +125,30 @@ ADD CONSTRAINT PK_Student   /* Naming a unique constraint */
 UNIQUE (ID, FirstName);
 
 ```
+## 10. What is a Foreign Key?
+A FOREIGN KEY comprises of single or collection of fields in a table that essentially refers to the PRIMARY KEY in another table. Foreign key constraint ensures referential integrity in the relation between two tables.
+The table with the foreign key constraint is labeled as the child table, and the table containing the candidate key is labeled as the referenced or parent table.
+```
+CREATE TABLE Students (   /* Create table with foreign key - Way 1 */
+   ID INT NOT NULL
+   Name VARCHAR(255)
+   LibraryID INT
+   PRIMARY KEY (ID)
+   FOREIGN KEY (Library_ID) REFERENCES Library(LibraryID)
+);
 
+CREATE TABLE Students (   /* Create table with foreign key - Way 2 */
+   ID INT NOT NULL PRIMARY KEY
+   Name VARCHAR(255)
+   LibraryID INT FOREIGN KEY (Library_ID) REFERENCES Library(LibraryID)
+);
+
+ALTER TABLE Students   /* Add a new foreign key */
+ADD FOREIGN KEY (LibraryID)
+REFERENCES Library (LibraryID);
+```
+- What type of integrity constraint does the foreign key ensure?
+- Write a SQL statement to add a FOREIGN KEY 'col_fk' in 'table_y' that references 'col_pk' in 'table_x'.
 
 
 
