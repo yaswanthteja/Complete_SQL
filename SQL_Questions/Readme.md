@@ -59,3 +59,47 @@ DBMS stands for Database Management System. DBMS is a system software responsibl
 
 ## 9. What is RDBMS? How is it different from DBMS?
 RDBMS stands for Relational Database Management System. The key difference here, compared to DBMS, is that RDBMS stores data in the form of a collection of tables, and relations can be defined between the common fields of these tables. Most modern database management systems like MySQL, Microsoft SQL Server, Oracle, IBM DB2, and Amazon Redshift are based on RDBMS.
+
+## 10.What are Constraints in SQL?
+Constraints are used to specify the rules concerning data in the table. It can be applied for single or multiple fields in an SQL table during the creation of the table or after creating using the ALTER TABLE command. The constraints are:
+
+- NOT NULL - Restricts NULL value from being inserted into a column.
+- CHECK - Verifies that all values in a field satisfy a condition.
+- DEFAULT - Automatically assigns a default value if no value has been specified for the field.
+- UNIQUE - Ensures unique values to be inserted into the field.
+- INDEX - Indexes a field providing faster retrieval of records.
+- PRIMARY KEY - Uniquely identifies each record in a table.
+- FOREIGN KEY - Ensures referential integrity for a record in another table.
+
+## 8. What is a Primary Key?
+The PRIMARY KEY constraint uniquely identifies each row in a table. It must contain UNIQUE values and has an implicit NOT NULL constraint.
+A table in SQL is strictly restricted to have one and only one primary key, which is comprised of single or multiple fields (columns).
+```
+
+CREATE TABLE Students (   /* Create table with a single field as primary key */
+   ID INT NOT NULL
+   Name VARCHAR(255)
+   PRIMARY KEY (ID)
+);
+
+CREATE TABLE Students (   /* Create table with multiple fields as primary key */
+   ID INT NOT NULL
+   LastName VARCHAR(255)
+   FirstName VARCHAR(255) NOT NULL,
+   CONSTRAINT PK_Student
+   PRIMARY KEY (ID, FirstName)
+);
+
+ALTER TABLE Students   /* Set a column as primary key */
+ADD PRIMARY KEY (ID);
+ALTER TABLE Students   /* Set multiple columns as primary key */
+ADD CONSTRAINT PK_Student   /*Naming a Primary Key*/
+PRIMARY KEY (ID, FirstName);
+
+```
+
+- write a sql statement to add primary key 't_id' to the table 'teachers'.
+- Write a SQL statement to add primary key constraint 'pk_a' for table 'table_a' and fields 'col_b, col_c'.
+
+## 9. What is a UNIQUE constraint?
+A UNIQUE constraint ensures that all values in a column are different. This provides uniqueness for the column(s) and helps identify each row uniquely. Unlike primary key, there can be multiple unique constraints defined per table. The code syntax for UNIQUE is quite similar to that of PRIMARY KEY and can be used interchangeably.
