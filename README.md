@@ -3,7 +3,7 @@
 # SQL Resources
 
 
-In this repo, I’m sharing a list of SQL resources which most of which I have practised and are highly recommended for beginners regardless of whether you're from a data or non-data background.
+In this repo, I’m sharing a list of SQL resources which most of which I have practiced and are highly recommended for beginners regardless of whether you're from a data or non-data background.
 
 Everything here is free!
 
