@@ -1,10 +1,10 @@
-# Basic Sql Questions
+# Basic SQL Questions
 
 ## 1 What is SQL?
 
- Structured Query Language SQL is a database tool that is used to create and access the database to support software applications.
+ Structured Query Language SQL is a database tool used to create and access the database to support software applications.
  
-MySQL is a multithreaded, multi-user SQL database management system which has more than 11 million installations. It is the world's second most popular and widely-used open source database. It is interesting how MySQL name was given to this query language. The term My is coined by the name of the daughter of co-founder Michael Widenius's daughter, and SQL is the short form of Structured Query Language. Using MySQL is free of cost for the developer, but enterprises have to pay a license fee to Oracle.
+MySQL is a multithreaded, multi-user SQL database management system that has more than 11 million installations. It is the world's second most popular and widely-used open source database. It is interesting how MySQL name was given to this query language. The term I is coined by the name of the daughter of co-founder Michael Widenius's daughter, and SQL is the short form of Structured Query Language. Using MySQL is free of cost for the developer, but enterprises have to pay a license fee to Oracle.
 
 Formerly MySQL was initially owned by a for-profit firm MySQL AB, then Sun Microsystems bought it, and then Oracle bought Sun Microsystems, so Oracle currently owns MySQL.
 
