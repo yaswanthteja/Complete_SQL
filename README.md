@@ -50,5 +50,6 @@ Everything here is free!
 ## 📝 Prepare for Technical Interview
 1. DataLemur - https://datalemur.com
 2. StrataScratch - https://platform.stratascratch.com/coding?code_type=1
+3. leet code - https://leetcode.com/studyplan/top-sql-50/
 
 ***
