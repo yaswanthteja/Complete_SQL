@@ -1,10 +1,8 @@
 # CSV
 
-
 Here is the code for uploading these csv into postgresql
 
 ```sql
-  
 
 
  CREATE DATABASE shopmart;
@@ -18,7 +16,7 @@ create table customer(customer_id int,
 					 address_id int
 					 )
 copy customer(customer_id,first_name,last_name,email,address_id)
-FROM 'E:\Complete_Placement\Databases\SQL_Tutorial\customer.csv'  -- location of the csv
+FROM 'E:\Complete_Placement\Databases\SQL_Tutorial\customer.csv'
 DELIMITER ','
 CSV HEADER
 
@@ -31,7 +29,7 @@ payment_date date
 )
 
 copy payment(customer,amount,mode,payment_date)
-FROM 'E:\Complete_Placement\Databases\SQL_Tutorial\payment.csv'  -- location of the csv
+FROM 'E:\Complete_Placement\Databases\SQL_Tutorial\payment.csv'
 DELIMITER ','
 CSV HEADER
 
@@ -42,8 +40,8 @@ create table customer_CTE(customer_id int,
 					 last_name varchar(100),
 					 address_id int
 					 )
-copy customer(customer_id,first_name,last_name,address_id)
-FROM 'E:\Complete_Placement\Databases\SQL_Tutorial\customer_CTE.csv'  -- location of the csv
+copy customer_CTE(customer_id,first_name,last_name,address_id)
+FROM 'E:\Complete_Placement\Databases\SQL_Tutorial\customer_CTE.csv'
 DELIMITER ','
 CSV HEADER
 
@@ -58,7 +56,7 @@ payment_date date
 )
 
 copy payment_cte(customer_id,amount,mode,payment_date)
-FROM 'E:\Complete_Placement\Databases\SQL_Tutorial\payment_CTE.csv'  -- location of the csv
+FROM 'E:\Complete_Placement\Databases\SQL_Tutorial\payment_CTE.csv'
 DELIMITER ','
 CSV HEADER
 
@@ -71,10 +69,16 @@ mode varchar(50),
 payment_date date
 )
 
-copy payment_cte(customer_id,amount,mode,payment_date)
-FROM 'E:\Complete_Placement\Databases\SQL_Tutorial\payment_Case.csv'  -- location of the csv
+copy payment_case(customer_id,amount,mode,payment_date)
+FROM 'E:\Complete_Placement\Databases\SQL_Tutorial\payment_Case.csv'
 DELIMITER ','
 CSV HEADER
 
+
+select * from customer;
+select * from payment;
+select * from customer_cte;
+select * from payment_cte;
+select * from payment_case;
 
 ```

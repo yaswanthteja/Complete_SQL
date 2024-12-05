@@ -35,7 +35,7 @@ create table customer_CTE(customer_id int,
 					 last_name varchar(100),
 					 address_id int
 					 )
-copy customer(customer_id,first_name,last_name,address_id)
+copy customer_CTE(customer_id,first_name,last_name,address_id)
 FROM 'E:\Complete_Placement\Databases\SQL_Tutorial\customer_CTE.csv'
 DELIMITER ','
 CSV HEADER
@@ -64,8 +64,14 @@ mode varchar(50),
 payment_date date
 )
 
-copy payment_cte(customer_id,amount,mode,payment_date)
+copy payment_case(customer_id,amount,mode,payment_date)
 FROM 'E:\Complete_Placement\Databases\SQL_Tutorial\payment_Case.csv'
 DELIMITER ','
 CSV HEADER
 
+
+select * from customer;
+select * from payment;
+select * from customer_cte;
+select * from payment_cte;
+select * from payment_case;
