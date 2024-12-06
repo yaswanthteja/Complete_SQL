@@ -11,7 +11,7 @@ create table customer(customer_id int,
 					 address_id int
 					 )
 copy customer(customer_id,first_name,last_name,email,address_id)
-FROM 'E:\Complete_Placement\Databases\SQL_Tutorial\customer.csv'
+FROM 'E:\Complete_Placement\Databases\SQL_Tutorial\customer.csv'  -- Location of the csv
 DELIMITER ','
 CSV HEADER
 
@@ -24,7 +24,7 @@ payment_date date
 )
 
 copy payment(customer,amount,mode,payment_date)
-FROM 'E:\Complete_Placement\Databases\SQL_Tutorial\payment.csv'
+FROM 'E:\Complete_Placement\Databases\SQL_Tutorial\payment.csv' -- Location of the csv
 DELIMITER ','
 CSV HEADER
 
@@ -36,7 +36,7 @@ create table customer_CTE(customer_id int,
 					 address_id int
 					 )
 copy customer_CTE(customer_id,first_name,last_name,address_id)
-FROM 'E:\Complete_Placement\Databases\SQL_Tutorial\customer_CTE.csv'
+FROM 'E:\Complete_Placement\Databases\SQL_Tutorial\customer_CTE.csv' -- Location of the csv
 DELIMITER ','
 CSV HEADER
 
@@ -51,7 +51,7 @@ payment_date date
 )
 
 copy payment_cte(customer_id,amount,mode,payment_date)
-FROM 'E:\Complete_Placement\Databases\SQL_Tutorial\payment_CTE.csv'
+FROM 'E:\Complete_Placement\Databases\SQL_Tutorial\payment_CTE.csv' -- Location of the csv
 DELIMITER ','
 CSV HEADER
 
@@ -65,7 +65,7 @@ payment_date date
 )
 
 copy payment_case(customer_id,amount,mode,payment_date)
-FROM 'E:\Complete_Placement\Databases\SQL_Tutorial\payment_Case.csv'
+FROM 'E:\Complete_Placement\Databases\SQL_Tutorial\payment_Case.csv' -- Location of the csv
 DELIMITER ','
 CSV HEADER
 
