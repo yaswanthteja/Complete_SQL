@@ -181,7 +181,7 @@ natural join department_j d;
 /*
 SELF JOIN
 A self join is a regular join in which a table is joined to  itself
-
+there is no self join term We can use any kind of join in self join ex: left join, right join
 */
 
 SELECT DISTINCT e1.emp_name AS employee_name, m.manager_name
@@ -189,6 +189,44 @@ FROM employee_j e1
 JOIN employee_j e2 ON e1.manager_id = e2.manager_id 
 	AND e1.emp_id <> e2.emp_id
 JOIN manager_j m ON e1.manager_id = m.manager_id;
+
+
+
+/*
+self join
+
+
+*/
+
+
+CREATE TABLE family_j (
+    member_id VARCHAR(10),
+    name VARCHAR(50),
+    age INTEGER,
+    parent_id VARCHAR(10)
+);
+
+INSERT INTO family_j (member_id, name, age, parent_id) VALUES
+('F1', 'David', 4, 'F5'),
+('F2', 'Carol', 10, 'F5'),
+('F3', 'Michael', 12, 'F5'),
+('F4', 'Johnson', 36, NULL),
+('F5', 'Maryam', 40, 'F6'),
+('F6', 'Stewart', 70, NULL),
+('F7', 'Rohan', 6, 'F4'),
+('F8', 'Asha', 8, 'F4');
+
+select * from family_j;
+
+select  child.name as child_name
+,child.age as child_age
+,parent.name as parent_name
+,parent.age as parent_age
+from family_j as child
+join family_j as parent
+on child.parent_id=parent.member_id
+
+
 
 
 
