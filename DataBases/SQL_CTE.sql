@@ -1,6 +1,6 @@
 -- CTE (Common Table Expression)
 -- QUERY 1 :
-drop table emp;
+drop table emp_cte;
 create table emp_cte
 ( emp_ID int
 , emp_NAME varchar(50)
@@ -15,13 +15,13 @@ insert into emp_cte values(106, 'Jimmy', 90000);
 
 select * from emp_cte;
 
-with avg_sal(avg_salary) as
-		(select cast(avg(salary) as int) from emp_cte)
+-- Fetch employees who earn more than average salary of all employees
+
+with average_salary(avg_salary) as 
+			(select cast (avg(salary)as int) from emp_cte)
 select *
-from emp_cte e
-join avg_sal av on e.salary > av.avg_salary
-
-
+from emp_cte e,average_salary av
+where e.salary >av.avg_salary
 
 
 
@@ -51,44 +51,50 @@ insert into sales_cte values
 select * from sales_cte;
 
 
--- Find total sales per each store
-select s.store_id, sum(s.cost) as total_sales_per_store
+-- Find stores who's sales where better than the average sales accross all stores
+
+-- 1. Find total sales per each store  --Total_Sales
+select  s.store_id,sum(cost) as total_sales_per_stores
 from sales_cte s
 group by s.store_id;
 
 
--- Find average sales with respect to all stores
-select cast(avg(total_sales_per_store) as int) avg_sale_for_all_store
-from (select s.store_id, sum(s.cost) as total_sales_per_store
-	from sales_cte s
-	group by s.store_id) x;
+-- 2.Find average sales with respect to all stores  -- Avg_Sales
 
+select  cast(avg(total_sales_per_stores)as int) as average_sales_for_all_stores
+from (select  s.store_id,sum(cost) as total_sales_per_stores
+from sales_cte s
+group by s.store_id)
 
+-- 3. find the store where Total_sales >Avg_sales of all stores
 
--- Find stores who's sales where better than the average sales accross all stores
-select *
-from   (select s.store_id, sum(s.cost) as total_sales_per_store
-				from sales_cte s
-				group by s.store_id
-	   ) total_sales
-join   (select cast(avg(total_sales_per_store) as int) avg_sale_for_all_store
-				from (select s.store_id, sum(s.cost) as total_sales_per_store
-		  	  		from sales_cte s
-			  			group by s.store_id) x
-	   ) avg_sales
-on total_sales.total_sales_per_store > avg_sales.avg_sale_for_all_store;
-
+--Final Query
 
 
 -- Using WITH clause
 WITH total_sales as
-		(select s.store_id, sum(s.cost) as total_sales_per_store
+		(select s.store_id, sum(s.cost) as total_sales_per_stores
 		from sales_cte s
 		group by s.store_id),
 	avg_sales as
-		(select cast(avg(total_sales_per_store) as int) avg_sale_for_all_store
+		(select cast(avg(total_sales_per_stores) as int) avg_sale_for_all_stores
 		from total_sales)
 select *
-from   total_sales
-join   avg_sales
-on total_sales.total_sales_per_store > avg_sales.avg_sale_for_all_store;
+from   total_sales ts
+join   avg_sales av
+on ts.total_sales_per_stores > av.avg_sale_for_all_stores;
+
+-- using subqueries
+
+select *
+from   (select s.store_id, sum(s.cost) as total_sales_per_stores
+				from sales_cte s
+				group by s.store_id
+	   ) total_sales
+join   (select cast(avg(total_sales_per_stores) as int) avg_sale_for_all_stores
+				from (select s.store_id, sum(s.cost) as total_sales_per_stores
+		  	  		from sales_cte s
+			  			group by s.store_id) x
+	   ) avg_sales
+on total_sales.total_sales_per_stores > avg_sales.avg_sale_for_all_stores;
+
