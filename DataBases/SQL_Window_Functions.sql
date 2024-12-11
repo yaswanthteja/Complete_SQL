@@ -97,14 +97,36 @@ FROM test_wf;
 
 
 
+
+/*
+ROW_NUMBER() :-The ROW_NUMBER function assigns a unique sequential integer to each row within the partition of a result set, starting at 1 for the first row.
+RANK(): - The RANK() function assigns a rank to each row within the partition of a result set. When it encounters ties (duplicate values), it assigns the same rank to the tied values and skips the consecutive ranks for the next values.
+DENSE_RANK():- The DENSE_RANK function assigns a rank to each row within the partition of a result set, and if there are duplicate values, it assigns the same rank to those values. Unlike RANK(), DENSE_RANK continues the ranking without skipping any ranks after the duplicates.
+PERCENT_RANK():- The PERCENT_RANK function assigns a rank in percentages to each row within the partition of a result set, and if there are duplicate values, it assigns the same rank to those values. Unlike RANK(), PERCENT_RANK continues the ranking without skipping any ranks after the duplicates.
+NTILE():- The NTILE function assigns a bucket number to each row in the partition, with the number of buckets specified as an argument.
+NTILE(4) number can be any thing and  it will divides the rows into number of buckets (quartiles) with in column we specified.
+
+*/
+
+/*
+NTILE()
+
+Defination :The NTILE function assigns a bucket number to each row in the partition, with the number of buckets specified as an argument.
+
+NTILE(4) number can be any thing and  it will divides the rows into number of buckets (quartiles) with in column we specified.
+
+*/
+
+
+
 -- Ranking functions 
 
-SELECT new_id,new_cat,
+SELECT new_id,
 ROW_NUMBER() OVER(ORDER BY new_id) AS "ROW_NUMBER",
 RANK() OVER(ORDER BY new_id) AS "RANK",
-DENSE_RANK() OVER(ORDER BY new_id) AS "DENSE_RANK", 
+DENSE_RANK() OVER(ORDER BY new_id) AS "DENSE_RANK",  
 PERCENT_RANK() OVER(ORDER BY new_id) AS "PERCENT_RANK",
-NTILE(3) OVER(ORDER BY new_id) "NTILE"
+NTILE(4)OVER(ORDER BY new_id) AS "NTILE"
 FROM test_wf
 
 
@@ -208,5 +230,348 @@ insert into employee_wf values(101, 'Mohan', 'Admin', 4000),
 
 
 select * from employee_wf;
+
+-- Using Aggregate functions
+select dept_name,max(salary) as max_salary
+from employee_wf
+group by dept_name;
+
+
+-- using window function, by using window function it will create a window 
+select e.*,
+max(salary) over() as max_salary
+from employee_wf e;
+
+
+
+-- find the maximum salary of employees on each  department
+select e.*,
+MAX(salary) over(partition by dept_name) as Max_salary
+from employee_wf e;
+
+
+--find the minimum salary of employees on each  department
+select e.*,
+MIN(salary) over(partition by dept_name) as Min_salary
+from employee_wf e;
+
+--  find the total count of employee  on each  department 
+select e.*,
+count(emp_id) over(partition by dept_name) as count_emp
+from employee_wf e;
+
+-- find the avg salary of employees on each  department in integer
+SELECT e.*,
+CAST(AVG(salary) OVER (PARTITION BY dept_name) AS INT) AS avg_salary
+FROM employee_wf e;
+
+-- find the total salary of employees on each  department
+select e.*,
+sum(salary) over(partition by dept_name) as total_salary
+from employee_wf e;
+
+
+-- Ranking Functions
+
+-- row _number
+
+select e.*,
+row_number() over() as row_num
+from employee_wf e;
+
+-- find the no of employees on each  department
+select e.*,
+row_number() over(partition by dept_name) as row_num
+from employee_wf e;
+
+-- fetch the first 2 employees from each department to join the companay
+
+select *
+from(
+	select e.*,
+	row_number() over(partition by dept_name order by emp_id) as row_num
+	from employee_wf e )x
+where x.row_num<3;
+
+-- fetch the top3 employees in each deaprtment earning the max salary.
+
+select * from(
+	select e.*,
+	rank() over(partition by dept_name order by salary desc) as rnk
+	from employee_wf e) x
+where x.rnk<4;
+
+
+-- Differnce between rank, dense rank,percent rank
+select e.*, 
+rank() over(partition by dept_name order by salary desc)as rnk,
+dense_rank() over(partition by dept_name order by salary desc) as dense_rnk,
+percent_rank()over(partition by dept_name order by salary desc)as percent_rnk,
+row_number() over(partition by dept_name order by salary desc)as row_num
+
+from employee_wf e;
+
+
+
+--NTILE()
+
+
+SELECT e.*,
+    NTILE(4) OVER (PARTITION BY DEPT_NAME ORDER BY SALARY) AS salary_quartile
+FROM employee_wf e;
+
+-- if we specify NTILE(2)
+
+SELECT e.*,
+    NTILE(2) OVER (PARTITION BY DEPT_NAME ORDER BY SALARY) AS salary_half
+FROM employee_wf e;
+
+
+
+
+
+
+
+
+-- lag() -fetches previous row data
+select e.*,
+lag(salary)over(partition by dept_name order by emp_id)as previous_salary
+from employee_wf e;
+
+/*
+In lag() and lead()
+ lag(): we can pass arguments example lag(salary,2,0)  here 2 is the number of rows prior or previous to current row by deault it is 1, 0 can be anything and is the value which relaces default value that is null.
+lead() we can pass arguments example lead(salary,2,0)  here 2 is the number of rows next to current row by deault it is 1, 0 can be anything and is the value which relaces default value that is null.
+
+*/
+select e.*,
+lag(salary,2,0)over(partition by dept_name order by emp_id)as previous_salary
+from employee_wf e;
+
+
+--Lead() --fetches the next row data
+
+select e.*,
+lead(salary) over(partition by dept_name order by emp_id) as next_salary
+from employee_wf e;
+
+-- fetch the details for 2 rows
+select e.*,
+lead(salary,2,0) over(partition by dept_name order by emp_id) as next_salary
+from employee_wf e;
+
+
+
+-- fetch a quey to display if the salary of an employee is higher,lower or equal to the previous employee.
+
+select e.*,
+lag(salary) over(partition by dept_name order by emp_id) as previous_sal,
+case
+	when e.salary > lag(salary) over(partition by dept_name order by emp_id ) then 'higher than previous salary' 
+	when e.salary < lag(salary) over(partition by dept_name order by emp_id ) then 'lower than previous salary' 
+	when e.salary = lag(salary) over(partition by dept_name order by emp_id ) then 'same as the previous  salary'
+	end sal_range
+
+from employee_wf e;
+
+
+
+
+
+/*
+Analytical Functions
+*/
+
+
+
+/*
+
+
+
+*/
+
+
+
+-- Script to create the Products table and load data into it.
+
+DROP TABLE products_wf;
+CREATE TABLE products_wf
+( 
+    product_category varchar(255),
+    brand varchar(255),
+    product_name varchar(255),
+    price int
+);
+
+INSERT INTO products_wf VALUES
+('Phone', 'Apple', 'iPhone 12 Pro Max', 1300),
+('Phone', 'Apple', 'iPhone 12 Pro', 1100),
+('Phone', 'Apple', 'iPhone 12', 1000),
+('Phone', 'Samsung', 'Galaxy Z Fold 3', 1800),
+('Phone', 'Samsung', 'Galaxy Z Flip 3', 1000),
+('Phone', 'Samsung', 'Galaxy Note 20', 1200),
+('Phone', 'Samsung', 'Galaxy S21', 1000),
+('Phone', 'OnePlus', 'OnePlus Nord', 300),
+('Phone', 'OnePlus', 'OnePlus 9', 800),
+('Phone', 'Google', 'Pixel 5', 600),
+('Laptop', 'Apple', 'MacBook Pro 13', 2000),
+('Laptop', 'Apple', 'MacBook Air', 1200),
+('Laptop', 'Microsoft', 'Surface Laptop 4', 2100),
+('Laptop', 'Dell', 'XPS 13', 2000),
+('Laptop', 'Dell', 'XPS 15', 2300),
+('Laptop', 'Dell', 'XPS 17', 2500),
+('Earphone', 'Apple', 'AirPods Pro', 280),
+('Earphone', 'Samsung', 'Galaxy Buds Pro', 220),
+('Earphone', 'Samsung', 'Galaxy Buds Live', 170),
+('Earphone', 'Sony', 'WF-1000XM4', 250),
+('Headphone', 'Sony', 'WH-1000XM4', 400),
+('Headphone', 'Apple', 'AirPods Max', 550),
+('Headphone', 'Microsoft', 'Surface Headphones 2', 250),
+('Smartwatch', 'Apple', 'Apple Watch Series 6', 1000),
+('Smartwatch', 'Apple', 'Apple Watch SE', 400),
+('Smartwatch', 'Samsung', 'Galaxy Watch 4', 600),
+('Smartwatch', 'OnePlus', 'OnePlus Watch', 220);
+
+
+
+
+
+-- All the SQL Queries 
+
+select * from products_wf;
+
+
+-- FIRST_VALUE :- Returns the first value in an ordered set of values.
+
+
+-- Write query to display the most expensive product under each category (corresponding to each record)
+
+select p.*,
+FIRST_VALUE(product_name) over(partition by product_category order by price desc) as most_exp_product
+from products_wf p;
+
+
+-- LAST_VALUE  Returns the last value in an ordered set of values.
+
+
+-- Write query to display the least expensive product under each category (corresponding to each record)
+
+
+
+
+-- Alternate way to write SQL query using Window functions
+     
+
+            
+-- NTH_VALUE 
+-- Write query to display the Second most expensive product under each category.
+
+
+
+
+-- NTILE
+-- Write a query to segregate all the expensive phones, mid range phones and the cheaper phones.
+
+
+
+
+
+-- CUME_DIST (cumulative distribution) ; 
+/*  Formula = Current Row no (or Row No with value same as current row) / Total no of rows */
+
+-- Query to fetch all products which are constituting the first 30% 
+-- of the data in products table based on price.
+
+
+
+
+
+-- PERCENT_RANK (relative rank of the current row / Percentage Ranking)
+/* Formula = Current Row No - 1 / Total no of rows - 1 */
+
+-- Query to identify how much percentage more expensive is "Galaxy Z Fold 3" when compared to all products.
+
+
+Window
+A window function creates a window, also known as a partition. This window is a subset of rows defined by the PARTITION BY clause. All rows sharing the same value(s) in the partitioning column(s) form a partition.
+
+
+The frame clause in SQL window functions is used to define the set of rows that the window function operates over, called the window frame. The frame can be defined using ROWS or RANGE, each with its own behavior:
+
+ROWS vs. RANGE
+ROWS: Defines the window frame in terms of a specific number of rows before and after the current row.
+
+RANGE: Defines the window frame in terms of a range of values relative to the current row's value.
+
+Frame Specifications
+
+UNBOUNDED PRECEDING: The frame starts at the first row of the partition.
+
+UNBOUNDED FOLLOWING: The frame ends at the last row of the partition.
+
+CURRENT ROW: The frame includes only the current row.
+
+n PRECEDING: The frame starts n rows before the current row.
+
+n FOLLOWING: The frame ends n rows after the current row.
+
+
+
+
+
+
+-- using row clause
+-- Calculate the running total of salaries within each department for the current row and the two preceding rows.
+
+SELECT 
+    emp_ID, 
+    emp_NAME, 
+    DEPT_NAME, 
+    SALARY,
+    SUM(SALARY) OVER (
+        PARTITION BY DEPT_NAME 
+        ORDER BY SALARY 
+        ROWS BETWEEN 2 PRECEDING AND CURRENT ROW
+    ) AS running_total
+FROM employee_wf;
+
+
+
+
+-- using range clause
+
+-- Calculate the running total of salaries within each department for rows with the same salary or up to two less than the current row's salary.
+
+
+SELECT 
+    emp_ID, 
+    emp_NAME, 
+    DEPT_NAME, 
+    SALARY,
+    SUM(SALARY) OVER (
+        PARTITION BY DEPT_NAME 
+        ORDER BY SALARY 
+        RANGE BETWEEN 2 PRECEDING AND CURRENT ROW
+    ) AS running_total
+FROM employee_wf;
+
+
+
+Window (or Partition)
+Definition: A window function creates a window, also known as a partition. This window is a subset of rows defined by the PARTITION BY clause. All rows sharing the same value(s) in the partitioning column(s) form a partition.
+
+Frame
+Definition: Within each partition, a frame is a further subset of rows defined by the ROWS or RANGE clause. This frame determines the specific rows the window function operates on within the partition.
+
+
+
+Window/Partition: Defines a group of rows for the window function to operate on.
+
+Frame: Defines a subset of the partition for more specific operations.
+
+
+
+
+
 
 
