@@ -443,7 +443,6 @@ select * from products_wf;
 
 -- FIRST_VALUE :- Returns the first value in an ordered set of values.
 
-
 -- Write query to display the most expensive product under each category (corresponding to each record)
 
 select p.*,
@@ -454,17 +453,282 @@ from products_wf p;
 -- LAST_VALUE  Returns the last value in an ordered set of values.
 
 
+
+select p.*,
+LAST_VALUE(product_name) over(partition by product_category order by price desc) as least_exp_product
+from products_wf p;
+
+
+
+select p.*,
+FIRST_VALUE(product_name) over(partition by product_category order by price desc) as most_exp_product,
+LAST_VALUE(product_name) over(partition by product_category order by price desc) as least_exp_product
+from products_wf p;
+
+-- In the least_exp_product column  will  get same product name as product_name because of default frame clause implementation
+
+
+
+
+/*
+
+-- Window (or Partition) : Defines a group of rows for the window function to operate on.
+ 
+ A window function creates a window, also known as a partition. This window is a subset of rows defined by the PARTITION BY clause.
+ All rows sharing the same value(s) in the partitioning column(s) form a partition.
+
+-- Frame :- Defines a subset of the partition for more specific operations.
+
+ Within each partition, a frame is a further subset of rows defined by the ROWS or RANGE clause. 
+ This frame determines the specific rows the window function operates on within the partition.
+
+
+
+In SQL window functions is used to define the set of rows that the window function operates over, called the window frame. The frame can be defined using ROWS or RANGE, each with its own behavior:
+
+-- ROWS vs. RANGE
+
+ROWS: Defines the window frame in terms of a specific number of rows before and after the current row.
+
+RANGE: Defines the window frame in terms of a range of values relative to the current row's value.
+
+DEFAULT FRAME Implementation in SQl  is 
+
+------- RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW -------
+
+-- Frame Specifications
+
+- UNBOUNDED PRECEDING: The frame starts at the first row of the partition.
+
+- UNBOUNDED FOLLOWING: The frame ends at the last row of the partition.
+
+- CURRENT ROW: The frame includes only the current row.
+
+- n PRECEDING: The frame starts n rows before the current row.
+
+- n FOLLOWING: The frame ends n rows after the current row.
+
+
+*/
+
+
+
+
+/*
+
+FIRST_VALUE
+Behavior: The FIRST_VALUE function retrieves the first value in the specified frame.
+
+Default Frame: RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+
+Impact: For most use cases, FIRST_VALUE consistently returns the first value in the ordered set within the partition. 
+The default frame specification usually doesn't alter its expected behavior, as the first row remains consistent.
+
+By default, the FIRST_VALUE might not cover all rows unless the frame is explicitly set to include all rows (UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING).
+
+*/
+
+
+SELECT 
+    p.*, 
+    FIRST_VALUE(product_name) OVER (
+        PARTITION BY product_category 
+        ORDER BY price DESC
+    ) AS first_value_price
+FROM 
+    products_wf p;
+
+
+/*
+LAST_VALUE
+
+The LAST_VALUE function retrieves the last value in the specified frame.
+Behavior: The LAST_VALUE function retrieves the last value in the specified frame.
+
+Default Frame: RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+
+Impact: The default frame often limits the result to the current row or a subset of rows, thus potentially not reflecting the true last value of the entire partition.
+- Adjusting the frame to UNBOUNDED FOLLOWING ensures it considers all rows.
+- Better to use RANGE BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+
+*/
+
+SELECT p.*, 
+    LAST_VALUE(product_name)
+	OVER (
+        PARTITION BY product_category 
+        ORDER BY price DESC 
+        RANGE BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+   		 ) AS last_value_price
+FROM  products_wf p;
+
+
+
+
+
+
 -- Write query to display the least expensive product under each category (corresponding to each record)
+
+SELECT p.*,
+first_value(product_name) 
+	over(partition by product_category order by price desc)
+	as most_exp_product,
+last_value(product_name) 
+	over(partition by product_category order by price desc)
+	as least_exp_product_default, -- DEFAULT Frame implementation RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+last_value(product_name) 
+	over(partition by product_category order by price desc RANGE BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) 
+	as least_exp_product
+FROM products_wf p;
+
+
+
+/*
+LEAD() Function
+
+Definition: The LEAD function provides access to a row at a specified physical offset following the current row. 
+It's useful for comparing the current row's values with values in subsequent rows.
+
+Behavior: These functions access values at a specified physical offset following or preceding the current row.
+
+Frame Impact: While LEAD  do not directly use frame clauses, their interaction with other window functions can be influenced by the frame.
+
+Primarily affected by the ordering and partitioning but less directly by frames.
+
+syntax: LEAD(value_expression, offset, default) OVER (PARTITION BY partition_expression ORDER BY order_expression)
+
+
+
+*/
+
+
+
+SELECT 
+    p.*, 
+    LEAD(price, 1, 0) OVER (
+        PARTITION BY product_category 
+        ORDER BY price DESC
+    ) AS next_price
+FROM 
+    products_wf p;
+
+
+
+
+
+
+/*
+LAG() Function
+
+The LAG function provides access to a row at a specified physical offset preceding the current row. 
+It helps in comparing the current row's values with values in preceding rows.
+
+Behavior: These functions access values at a specified physical offset following or preceding the current row.
+
+Frame Impact: While LAG  do not directly use frame clauses, their interaction with other window functions can be influenced by the frame.
+
+Primarily affected by the ordering and partitioning but less directly by frames.
+
+
+Syntax:- LAG(value_expression, offset, default) OVER (PARTITION BY partition_expression ORDER BY order_expression)
+
+
+
+
+
+*/
+
+SELECT 
+    p.*, 
+    LAG(price, 1, 0) OVER (
+        PARTITION BY product_category 
+        ORDER BY price DESC
+    ) AS previous_price
+FROM 
+    products_wf p;
+
+
+
+
+/*
+LEAD and LAG
+
+- Behavior: These functions access values at a specified physical offset following or preceding the current row.
+
+- Frame Impact: While LEAD and LAG themselves do not directly use frame clauses, their interaction with other window functions can be influenced by the frame.
+
+- Primarily affected by the ordering and partitioning but less directly by frames.
+
+
+*/
+
+
+SELECT 
+    p.*, 
+    LEAD(price, 1) OVER (
+        PARTITION BY product_category 
+        ORDER BY price DESC
+    ) AS next_price,
+    LAG(price, 1) OVER (
+        PARTITION BY product_category 
+        ORDER BY price DESC
+    ) AS previous_price
+FROM 
+    products_wf p;
+
+
+
+
+
+
+
+/*
+NTH_VALUE
+The NTH_VALUE function in SQL is used to return the value of the nth row within a partition of a result set.
+It's useful when you need to retrieve a specific row's value within an ordered partition.
+Behavior: Retrieves the nth value in the specified frame.
+Frame Impact: The frame determines the subset of rows from which the nth value is retrieved. Incorrect frame specifications may limit the rows considered.
+
+syntax:- NTH_VALUE (value_expression, n) OVER (PARTITION BY partition_expression ORDER BY order_expression [ROWS/RANGE BETWEEN start_expression AND end_expression])
+
+
+
+*/
+
+
+SELECT 
+    p.*, 
+    NTH_VALUE(price, 2) OVER (
+        PARTITION BY product_category 
+        ORDER BY price DESC 
+        RANGE BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+    ) AS nth_value_price
+FROM 
+    products_wf p;
+
+
+
+            
+-- NTH_VALUE 
+-- Write query to display the Second most expensive product under each category.
+SELECT 
+    product_name, 
+    price, 
+    NTH_VALUE(price, 2) OVER (
+        PARTITION BY product_category 
+        ORDER BY price DESC 
+        RANGE BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+    ) AS second_most_expensive_price
+FROM 
+    products_wf;
+
 
 
 
 
 -- Alternate way to write SQL query using Window functions
-     
 
-            
--- NTH_VALUE 
--- Write query to display the Second most expensive product under each category.
+
 
 
 
@@ -492,30 +756,6 @@ from products_wf p;
 -- Query to identify how much percentage more expensive is "Galaxy Z Fold 3" when compared to all products.
 
 
-Window
-A window function creates a window, also known as a partition. This window is a subset of rows defined by the PARTITION BY clause. All rows sharing the same value(s) in the partitioning column(s) form a partition.
-
-
-The frame clause in SQL window functions is used to define the set of rows that the window function operates over, called the window frame. The frame can be defined using ROWS or RANGE, each with its own behavior:
-
-ROWS vs. RANGE
-ROWS: Defines the window frame in terms of a specific number of rows before and after the current row.
-
-RANGE: Defines the window frame in terms of a range of values relative to the current row's value.
-
-Frame Specifications
-
-UNBOUNDED PRECEDING: The frame starts at the first row of the partition.
-
-UNBOUNDED FOLLOWING: The frame ends at the last row of the partition.
-
-CURRENT ROW: The frame includes only the current row.
-
-n PRECEDING: The frame starts n rows before the current row.
-
-n FOLLOWING: The frame ends n rows after the current row.
-
-
 
 
 
@@ -540,7 +780,7 @@ FROM employee_wf;
 
 -- using range clause
 
--- Calculate the running total of salaries within each department for rows with the same salary or up to two less than the current row's salary.
+-- Calculate the running total of salaries within each department for rows with the same salary or up to two less than the current rows salary.
 
 
 SELECT 
@@ -557,17 +797,7 @@ FROM employee_wf;
 
 
 
-Window (or Partition)
-Definition: A window function creates a window, also known as a partition. This window is a subset of rows defined by the PARTITION BY clause. All rows sharing the same value(s) in the partitioning column(s) form a partition.
 
-Frame
-Definition: Within each partition, a frame is a further subset of rows defined by the ROWS or RANGE clause. This frame determines the specific rows the window function operates on within the partition.
-
-
-
-Window/Partition: Defines a group of rows for the window function to operate on.
-
-Frame: Defines a subset of the partition for more specific operations.
 
 
 
