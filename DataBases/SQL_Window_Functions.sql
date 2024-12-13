@@ -23,7 +23,7 @@ Let’s look at some definitions:
 
 - ORDER BY is used so that we can order the rows within each partition.  This is optional and does not have to be specified
 
-- ROWS can be used if we want to further limit the rows within our  partition. This is optional and usually not used
+- ROWS/RANGE can be used if we want to further limit the rows within our  partition. This is optional and usually not used
 
 
 
@@ -98,24 +98,25 @@ FROM test_wf;
 
 
 
+
+
+
+-- Ranking Functions
 /*
 ROW_NUMBER() :-The ROW_NUMBER function assigns a unique sequential integer to each row within the partition of a result set, starting at 1 for the first row.
+
 RANK(): - The RANK() function assigns a rank to each row within the partition of a result set. When it encounters ties (duplicate values), it assigns the same rank to the tied values and skips the consecutive ranks for the next values.
+
 DENSE_RANK():- The DENSE_RANK function assigns a rank to each row within the partition of a result set, and if there are duplicate values, it assigns the same rank to those values. Unlike RANK(), DENSE_RANK continues the ranking without skipping any ranks after the duplicates.
+
 PERCENT_RANK():- The PERCENT_RANK function assigns a rank in percentages to each row within the partition of a result set, and if there are duplicate values, it assigns the same rank to those values. Unlike RANK(), PERCENT_RANK continues the ranking without skipping any ranks after the duplicates.
+
 NTILE():- The NTILE function assigns a bucket number to each row in the partition, with the number of buckets specified as an argument.
-NTILE(4) number can be any thing and  it will divides the rows into number of buckets (quartiles) with in column we specified.
-
-*/
-
-/*
-NTILE()
-
-Defination :The NTILE function assigns a bucket number to each row in the partition, with the number of buckets specified as an argument.
 
 NTILE(4) number can be any thing and  it will divides the rows into number of buckets (quartiles) with in column we specified.
 
 */
+
 
 
 
@@ -726,25 +727,126 @@ FROM
 
 
 
+
+-- ROWS
+
+SELECT 
+    p.*,
+    first_value(product_name) OVER (
+        PARTITION BY product_category 
+        ORDER BY price DESC
+    ) AS most_exp_product,
+    last_value(product_name) OVER (
+        PARTITION BY product_category 
+        ORDER BY price DESC 
+        ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+    ) AS least_exp_product
+FROM 
+    products_wf AS p
+WHERE 
+    product_category = 'Phone';
+
+
+/*
+what rows will do is whenever  we say current row in row when we specify here as rows and if we use current row it will consider the exact current row.
+when we use rows when it's trying to process the row no 5 it will have access to those 5 records under its frame and within this frame the least expensive is galay z fold3 that why it's getting it and 
+row no6 we have least amount now it's printing iPhone 12
+
+*/
+
+
+
+
+
+-- Range
+
+
+SELECT 
+    p.*,
+    first_value(product_name) OVER (
+        PARTITION BY product_category 
+        ORDER BY price DESC
+    ) AS most_exp_product,
+    last_value(product_name) OVER (
+        PARTITION BY product_category 
+        ORDER BY price DESC 
+        RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+    ) AS least_exp_product
+FROM 
+    products_wf AS p
+WHERE 
+    product_category = 'Phone';
+
+
+/*
+What range will do is if that particular row and some other rows have duplicate values in this case 1000 is repeated 3 times
+we consider 1000 is because we have ordered by that price value, since three rows having same price the range will consider the last row with that price.
+
+when sql is trying to process the row 5 the last_value function will have access to all these seven records all these seven records will be within it's frame
+And within  it's frame it's goining to look for the least expensive product which is the galaxyS21 and add to those three records
+*/
+
+
+
+
 -- Alternate way to write SQL query using Window functions
 
+SELECT *,
+first_value(product_name) OVER w AS most_exp_product,
+last_value(product_name) OVER w AS least_exp_product
+-- AFTER WHERE CLAUSE BEFORE ORDER BY CLASS WE NEED TO MENTION WINDOW 
+FROM products_wf 
+window w AS (PARTITION BY product_category ORDER BY price DESC 
+        RANGE BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING);
 
 
+
+ 
 
 
 
 -- NTILE
 -- Write a query to segregate all the expensive phones, mid range phones and the cheaper phones.
 
+select product_name,
+case when x.buckets=1 then 'Expensiove Phones'
+	when x.buckets=2 then 'Mid Range Phones'
+	when x.buckets=3 then 'Cheaper Phones'
+	End Phone_category
 
+from (
+	select *,
+	ntile(3) over(order by price desc) as buckets
+	from products_wf
+	where product_category='Phone') x ;
 
 
 
 -- CUME_DIST (cumulative distribution) ; 
-/*  Formula = Current Row no (or Row No with value same as current row) / Total no of rows */
+
+/*  
+CUME_DIST()  stands for Cumulative Distribution. It calculates the relative position of a value within a set of values as percentage.
+
+	Formula = Current Row no (or Row No with value same as current row) / Total no of rows 
+   
+	Value =  return value of the CUME_DIST() function has a range of the low value greater than 0 and the high value less than or equal to 1.
+	
+ 	value --> 1 <= CUME_DIST >0 
+	
+	if there are some duplicate values  then it will check the window frame upto the last duplicate value of current row 
+	then it will divide that last duplicate value with that current row number and it will assign value that value to those duplicte value instead of row number
+
+*/
 
 -- Query to fetch all products which are constituting the first 30% 
 -- of the data in products table based on price.
+select product_name,(cume_dist_percentage ||'%') as cume_dist_percentage -- || concatenate
+from (
+	select *,
+	cume_dist() over (order by price desc) as cume_distribution ,
+	round(cume_dist() over (order by price desc)::numeric * 100, 2) as cume_dist_percentage
+	from products_wf) x
+where x.cume_dist_percentage <=30
 
 
 
@@ -794,11 +896,6 @@ SELECT
         RANGE BETWEEN 2 PRECEDING AND CURRENT ROW
     ) AS running_total
 FROM employee_wf;
-
-
-
-
-
 
 
 
