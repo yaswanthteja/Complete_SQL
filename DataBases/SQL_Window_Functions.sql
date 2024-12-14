@@ -30,7 +30,7 @@ Let’s look at some definitions:
 */
 
 /*
-Window Function Types
+Window Function Types (Not official division )
 
 - Aggregate Functioons :- sum(),count(),min(),max(),avg()
 - Ranking FUnctions :- ROW_NUMBER(),RANK(),DENSE_RANK(),PERCENT_RANK(),NTILE()
@@ -38,7 +38,7 @@ Window Function Types
 */
 
 
-
+DROP table test_wf;
 -- create table
 
 create table test_wf(new_id int,
@@ -92,7 +92,10 @@ Calculates results for the entire window frame. Each function will return the sa
 
 SELECT new_id, new_cat,
 SUM(new_id) OVER( ORDER BY new_id ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) AS "Total",
-AVG(new_id) OVER( ORDER BY new_id ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) AS "Average",  COUNT(new_id) OVER( ORDER BY new_id ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) AS "Count",  MIN(new_id) OVER( ORDER BY new_id ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) AS "Min",  MAX(new_id) OVER( ORDER BY new_id ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) AS "Max"
+AVG(new_id) OVER( ORDER BY new_id ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) AS "Average",  
+COUNT(new_id) OVER( ORDER BY new_id ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) AS "Count",  
+MIN(new_id) OVER( ORDER BY new_id ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) AS "Min",  
+MAX(new_id) OVER( ORDER BY new_id ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) AS "Max"
 FROM test_wf;
 
 
@@ -146,7 +149,8 @@ FROM test_wf;
 
 -- NTH_VALUE with out specified frame gives you null for the first row
 
-SELECT new_id, FIRST_VALUE(new_id) OVER( ORDER BY new_id) AS "FIRST_VALUE", 
+SELECT new_id, 
+FIRST_VALUE(new_id) OVER( ORDER BY new_id) AS "FIRST_VALUE", 
 LAST_VALUE(new_id) OVER( ORDER BY new_id) AS "LAST_VALUE",
 LEAD(new_id)OVER( ORDER BY new_id) AS "LEAD", 
 LAG(new_id) OVER( ORDER BY new_id) AS "LAG", 
@@ -164,6 +168,7 @@ FROM test_wf;
 
 
 How NTH_VALUE Works Without Specified Frame
+
 For the first row (new_id = 100):
 
 -The window frame is: [100]
@@ -193,202 +198,10 @@ Since NTH_VALUE(new_id, 2) needs the second value and it doesn't exist in the fr
 
 
 
--- create the tables 
-
-drop table employee_wf;
-
--- creating the employee_sq table
-create table employee_wf
-( emp_ID int
-, emp_NAME varchar(50)
-, DEPT_NAME varchar(50)
-, SALARY int);
-
-insert into employee_wf values(101, 'Mohan', 'Admin', 4000),
-(102, 'Rajkumar', 'HR', 3000),
-(103, 'Akbar', 'IT', 4000),
-(104, 'Dorvin', 'Finance', 6500),
-(105, 'Rohit', 'HR', 3000),
-(106, 'Rajesh',  'Finance', 5000),
-(107, 'Preet', 'HR', 7000),(108, 'Maryam', 'Admin', 4000),
-(109, 'Sanjay', 'IT', 6500),
-(110, 'Vasudha', 'IT', 7000),
-(111, 'Melinda', 'IT', 8000),
-(112, 'Komal', 'IT', 10000),
-(113, 'Gautham', 'Admin', 2000),
-(114, 'Manisha', 'HR', 3000),
-(115, 'Chandni', 'IT', 4500),
-(116, 'Satya', 'Finance', 6500),
-(117, 'Adarsh', 'HR', 3500),
-(118, 'Tejaswi', 'Finance', 5500),
-(119, 'Cory', 'HR', 8000),
-(120, 'Monica', 'Admin', 5000),
-(121, 'Rosalin', 'IT', 6000),
-(122, 'Ibrahim', 'IT', 8000),
-(123, 'Vikram', 'IT', 8000),
-(124, 'Dheeraj', 'IT', 11000);
-
-
-
-select * from employee_wf;
-
--- Using Aggregate functions
-select dept_name,max(salary) as max_salary
-from employee_wf
-group by dept_name;
-
-
--- using window function, by using window function it will create a window 
-select e.*,
-max(salary) over() as max_salary
-from employee_wf e;
-
-
-
--- find the maximum salary of employees on each  department
-select e.*,
-MAX(salary) over(partition by dept_name) as Max_salary
-from employee_wf e;
-
-
---find the minimum salary of employees on each  department
-select e.*,
-MIN(salary) over(partition by dept_name) as Min_salary
-from employee_wf e;
-
---  find the total count of employee  on each  department 
-select e.*,
-count(emp_id) over(partition by dept_name) as count_emp
-from employee_wf e;
-
--- find the avg salary of employees on each  department in integer
-SELECT e.*,
-CAST(AVG(salary) OVER (PARTITION BY dept_name) AS INT) AS avg_salary
-FROM employee_wf e;
-
--- find the total salary of employees on each  department
-select e.*,
-sum(salary) over(partition by dept_name) as total_salary
-from employee_wf e;
-
-
--- Ranking Functions
-
--- row _number
-
-select e.*,
-row_number() over() as row_num
-from employee_wf e;
-
--- find the no of employees on each  department
-select e.*,
-row_number() over(partition by dept_name) as row_num
-from employee_wf e;
-
--- fetch the first 2 employees from each department to join the companay
-
-select *
-from(
-	select e.*,
-	row_number() over(partition by dept_name order by emp_id) as row_num
-	from employee_wf e )x
-where x.row_num<3;
-
--- fetch the top3 employees in each deaprtment earning the max salary.
-
-select * from(
-	select e.*,
-	rank() over(partition by dept_name order by salary desc) as rnk
-	from employee_wf e) x
-where x.rnk<4;
-
-
--- Differnce between rank, dense rank,percent rank
-select e.*, 
-rank() over(partition by dept_name order by salary desc)as rnk,
-dense_rank() over(partition by dept_name order by salary desc) as dense_rnk,
-percent_rank()over(partition by dept_name order by salary desc)as percent_rnk,
-row_number() over(partition by dept_name order by salary desc)as row_num
-
-from employee_wf e;
-
-
-
---NTILE()
-
-
-SELECT e.*,
-    NTILE(4) OVER (PARTITION BY DEPT_NAME ORDER BY SALARY) AS salary_quartile
-FROM employee_wf e;
-
--- if we specify NTILE(2)
-
-SELECT e.*,
-    NTILE(2) OVER (PARTITION BY DEPT_NAME ORDER BY SALARY) AS salary_half
-FROM employee_wf e;
-
-
-
-
-
-
-
-
--- lag() -fetches previous row data
-select e.*,
-lag(salary)over(partition by dept_name order by emp_id)as previous_salary
-from employee_wf e;
-
-/*
-In lag() and lead()
- lag(): we can pass arguments example lag(salary,2,0)  here 2 is the number of rows prior or previous to current row by deault it is 1, 0 can be anything and is the value which relaces default value that is null.
-lead() we can pass arguments example lead(salary,2,0)  here 2 is the number of rows next to current row by deault it is 1, 0 can be anything and is the value which relaces default value that is null.
-
-*/
-select e.*,
-lag(salary,2,0)over(partition by dept_name order by emp_id)as previous_salary
-from employee_wf e;
-
-
---Lead() --fetches the next row data
-
-select e.*,
-lead(salary) over(partition by dept_name order by emp_id) as next_salary
-from employee_wf e;
-
--- fetch the details for 2 rows
-select e.*,
-lead(salary,2,0) over(partition by dept_name order by emp_id) as next_salary
-from employee_wf e;
-
-
-
--- fetch a quey to display if the salary of an employee is higher,lower or equal to the previous employee.
-
-select e.*,
-lag(salary) over(partition by dept_name order by emp_id) as previous_sal,
-case
-	when e.salary > lag(salary) over(partition by dept_name order by emp_id ) then 'higher than previous salary' 
-	when e.salary < lag(salary) over(partition by dept_name order by emp_id ) then 'lower than previous salary' 
-	when e.salary = lag(salary) over(partition by dept_name order by emp_id ) then 'same as the previous  salary'
-	end sal_range
-
-from employee_wf e;
-
-
-
 
 
 /*
 Analytical Functions
-*/
-
-
-
-/*
-
-
-
 */
 
 
@@ -728,7 +541,7 @@ FROM
 
 
 
--- ROWS
+-- ROWS  Defines the window frame by a specific number of rows, making it useful for scenarios where you need to count a fixed number of preceding or following rows.
 
 SELECT 
     p.*,
@@ -758,7 +571,7 @@ row no6 we have least amount now it's printing iPhone 12
 
 
 
--- Range
+-- Range Defines the window frame by value ranges, making it suitable for calculations based on logical value boundaries.
 
 
 SELECT 
@@ -794,8 +607,8 @@ And within  it's frame it's goining to look for the least expensive product whic
 SELECT *,
 first_value(product_name) OVER w AS most_exp_product,
 last_value(product_name) OVER w AS least_exp_product
--- AFTER WHERE CLAUSE BEFORE ORDER BY CLASS WE NEED TO MENTION WINDOW 
 FROM products_wf 
+-- AFTER WHERE CLAUSE BEFORE ORDER BY CLASS WE NEED TO MENTION WINDOW 
 window w AS (PARTITION BY product_category ORDER BY price DESC 
         RANGE BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING);
 
@@ -853,12 +666,220 @@ where x.cume_dist_percentage <=30
 
 
 -- PERCENT_RANK (relative rank of the current row / Percentage Ranking)
-/* Formula = Current Row No - 1 / Total no of rows - 1 */
+/* 
+The PERCENT_RANK is a windowFunction that calculates the relative rank of a row with in a partition or dataset as a percentage
+The percentage is computed as a rank of the current row minus one, divided by the total number of rows in the partittion minus one
+
+Formula = (Current Row No - 1 )/ (Total no of rows - 1)
+
+syntax:
+	SELECT *,
+	PERCENT_RANK()OVER(PARTITION BY exp,
+						ORDER BY exp,
+						)AS PERCENTRANK
+	FROM table;
+
+The result of PERCENT_RANK() is always between 0 and 1
+
+*/
 
 -- Query to identify how much percentage more expensive is "Galaxy Z Fold 3" when compared to all products.
 
 
+select product_name,per_rank
+from (
+	select *,
+	PERCENT_RANK() over(order by price) as percentage_rank,
+	round(PERCENT_RANK() over(order by price)::numeric * 100,2) as per_rank
+	from products_wf) x
+where x.product_name='Galaxy Z Fold 3';
 
+
+
+
+
+
+-- create the tables 
+
+drop table employee_wf;
+
+-- creating the employee_sq table
+create table employee_wf
+( emp_ID int
+, emp_NAME varchar(50)
+, DEPT_NAME varchar(50)
+, SALARY int);
+
+insert into employee_wf values(101, 'Mohan', 'Admin', 4000),
+(102, 'Rajkumar', 'HR', 3000),
+(103, 'Akbar', 'IT', 4000),
+(104, 'Dorvin', 'Finance', 6500),
+(105, 'Rohit', 'HR', 3000),
+(106, 'Rajesh',  'Finance', 5000),
+(107, 'Preet', 'HR', 7000),(108, 'Maryam', 'Admin', 4000),
+(109, 'Sanjay', 'IT', 6500),
+(110, 'Vasudha', 'IT', 7000),
+(111, 'Melinda', 'IT', 8000),
+(112, 'Komal', 'IT', 10000),
+(113, 'Gautham', 'Admin', 2000),
+(114, 'Manisha', 'HR', 3000),
+(115, 'Chandni', 'IT', 4500),
+(116, 'Satya', 'Finance', 6500),
+(117, 'Adarsh', 'HR', 3500),
+(118, 'Tejaswi', 'Finance', 5500),
+(119, 'Cory', 'HR', 8000),
+(120, 'Monica', 'Admin', 5000),
+(121, 'Rosalin', 'IT', 6000),
+(122, 'Ibrahim', 'IT', 8000),
+(123, 'Vikram', 'IT', 8000),
+(124, 'Dheeraj', 'IT', 11000);
+
+
+
+select * from employee_wf;
+
+-- Using Aggregate functions
+select dept_name,max(salary) as max_salary
+from employee_wf
+group by dept_name;
+
+
+-- using window function, by using window function it will create a window 
+select e.*,
+max(salary) over() as max_salary
+from employee_wf e;
+
+
+
+-- find the maximum salary of employees on each  department
+select e.*,
+MAX(salary) over(partition by dept_name) as Max_salary
+from employee_wf e;
+
+
+--find the minimum salary of employees on each  department
+select e.*,
+MIN(salary) over(partition by dept_name) as Min_salary
+from employee_wf e;
+
+--  find the total count of employee  on each  department 
+select e.*,
+count(emp_id) over(partition by dept_name) as count_emp
+from employee_wf e;
+
+-- find the avg salary of employees on each  department in integer
+SELECT e.*,
+CAST(AVG(salary) OVER (PARTITION BY dept_name) AS INT) AS avg_salary
+FROM employee_wf e;
+
+-- find the total salary of employees on each  department
+select e.*,
+sum(salary) over(partition by dept_name) as total_salary
+from employee_wf e;
+
+
+-- Ranking Functions
+
+-- row _number
+
+select e.*,
+row_number() over() as row_num
+from employee_wf e;
+
+-- find the no of employees on each  department
+select e.*,
+row_number() over(partition by dept_name) as row_num
+from employee_wf e;
+
+-- fetch the first 2 employees from each department to join the companay
+
+select *
+from(
+	select e.*,
+	row_number() over(partition by dept_name order by emp_id) as row_num
+	from employee_wf e )x
+where x.row_num<3;
+
+-- fetch the top3 employees in each deaprtment earning the max salary.
+
+select * from(
+	select e.*,
+	rank() over(partition by dept_name order by salary desc) as rnk
+	from employee_wf e) x
+where x.rnk<4;
+
+
+-- Differnce between rank, dense rank,percent rank
+select e.*, 
+rank() over(partition by dept_name order by salary desc)as rnk,
+dense_rank() over(partition by dept_name order by salary desc) as dense_rnk,
+percent_rank()over(partition by dept_name order by salary desc)as percent_rnk,
+row_number() over(partition by dept_name order by salary desc)as row_num
+
+from employee_wf e;
+
+
+
+--NTILE()
+
+
+SELECT e.*,
+    NTILE(4) OVER (PARTITION BY DEPT_NAME ORDER BY SALARY) AS salary_quartile
+FROM employee_wf e;
+
+-- if we specify NTILE(2)
+
+SELECT e.*,
+    NTILE(2) OVER (PARTITION BY DEPT_NAME ORDER BY SALARY) AS salary_half
+FROM employee_wf e;
+
+
+
+
+
+
+
+
+-- lag() -fetches previous row data
+select e.*,
+lag(salary)over(partition by dept_name order by emp_id)as previous_salary
+from employee_wf e;
+
+/*
+In lag() and lead()
+ lag(): we can pass arguments example lag(salary,2,0)  here 2 is the number of rows prior or previous to current row by deault it is 1, 0 can be anything and is the value which relaces default value that is null.
+lead() we can pass arguments example lead(salary,2,0)  here 2 is the number of rows next to current row by deault it is 1, 0 can be anything and is the value which relaces default value that is null.
+
+*/
+select e.*,
+lag(salary,2,0)over(partition by dept_name order by emp_id)as previous_salary
+from employee_wf e;
+
+
+--Lead() --fetches the next row data
+
+select e.*,
+lead(salary) over(partition by dept_name order by emp_id) as next_salary
+from employee_wf e;
+
+-- fetch the details for 2 rows
+select e.*,
+lead(salary,2,0) over(partition by dept_name order by emp_id) as next_salary
+from employee_wf e;
+
+
+
+-- fetch a quey to display if the salary of an employee is higher,lower or equal to the previous employee.
+
+select e.*,
+lag(salary) over(partition by dept_name order by emp_id) as previous_sal,
+case
+	when e.salary > lag(salary) over(partition by dept_name order by emp_id ) then 'higher than previous salary' 
+	when e.salary < lag(salary) over(partition by dept_name order by emp_id ) then 'lower than previous salary' 
+	when e.salary = lag(salary) over(partition by dept_name order by emp_id ) then 'same as the previous  salary'
+	end sal_range
+
+from employee_wf e;
 
 
 
@@ -897,8 +918,5 @@ SELECT
     ) AS running_total
 FROM employee_wf;
 
-
-
-
-
+ 
 
