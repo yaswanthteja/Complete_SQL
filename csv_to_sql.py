@@ -4,6 +4,7 @@ import mysql.connector
 import os
 
 # List of CSV files and their corresponding table names
+# add the names of csv and their alias in db
 csv_files = [
     ('customers.csv', 'customers'),
     ('orders.csv', 'orders'),
@@ -12,6 +13,7 @@ csv_files = [
     ('delivery.csv', 'delivery'),
     ('payments.csv', 'payments')  # Added payments.csv for specific handling
 ]
+
 
 # Connect to the MySQL database
 conn = mysql.connector.connect(
