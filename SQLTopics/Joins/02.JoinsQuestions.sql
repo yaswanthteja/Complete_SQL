@@ -1,6 +1,6 @@
 
 
--- Reffer SQl_Joins_Answers.sql Answers
+-- Reffer SQl_Joins_Answers.sql for Answers
 
 
 
