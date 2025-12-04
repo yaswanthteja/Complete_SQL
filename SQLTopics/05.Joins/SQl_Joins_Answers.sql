@@ -1,6 +1,15 @@
 
+/*
+The table you put in the FROM clause is your anchor table (the one you want all rows from).
+
+The table you put in the LEFT JOIN (or RIGHT JOIN) is the secondary table (the one you want to match if possible, but allow NULLs if not).
 
 
+Which table’s rows must always appear in the result? → That goes in FROM.
+
+Which table’s data is optional (may be missing)? → That goes in LEFT JOIN.
+
+*/
 
 
 
