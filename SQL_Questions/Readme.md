@@ -72,6 +72,7 @@ Constraints are used to specify the rules concerning data in the table. It can b
 - FOREIGN KEY - Ensures referential integrity for a record in another table.
 
 ## 8. What is a Primary Key?
+
 The PRIMARY KEY constraint uniquely identifies each row in a table. It must contain UNIQUE values and has an implicit NOT NULL constraint.
 A table in SQL is strictly restricted to have one and only one primary key, which is comprised of single or multiple fields (columns).
 ```
@@ -102,6 +103,7 @@ PRIMARY KEY (ID, FirstName);
 - Write a SQL statement to add primary key constraint 'pk_a' for table 'table_a' and fields 'col_b, col_c'.
 
 ## 9. What is a UNIQUE constraint?
+
 A UNIQUE constraint ensures that all values in a column are different. This provides uniqueness for the column(s) and helps identify each row uniquely. Unlike primary key, there can be multiple unique constraints defined per table. The code syntax for UNIQUE is quite similar to that of PRIMARY KEY and can be used interchangeably.
 
 ```
@@ -126,8 +128,11 @@ UNIQUE (ID, FirstName);
 
 ```
 ## 10. What is a Foreign Key?
-A FOREIGN KEY comprises of single or collection of fields in a table that essentially refers to the PRIMARY KEY in another table. Foreign key constraint ensures referential integrity in the relation between two tables.
+
+A FOREIGN KEY comprises of single or collection of fields in a table that essentially refers to the PRIMARY KEY in another table. Foreign key constraint ensures referential integrity in the relation between two tables.It prevents invalid data entries.
+
 The table with the foreign key constraint is labeled as the child table, and the table containing the candidate key is labeled as the referenced or parent table.
+
 ```
 CREATE TABLE Students (   /* Create table with foreign key - Way 1 */
    ID INT NOT NULL
@@ -147,8 +152,75 @@ ALTER TABLE Students   /* Add a new foreign key */
 ADD FOREIGN KEY (LibraryID)
 REFERENCES Library (LibraryID);
 ```
-- What type of integrity constraint does the foreign key ensure?
-- Write a SQL statement to add a FOREIGN KEY 'col_fk' in 'table_y' that references 'col_pk' in 'table_x'.
+
+
+## 11. What is a Candidate key?
+ A candidate key is an attribute that can uniquely identify records. A table can have multiple candidate keys. One of them is chosen as the primary key. Others are called alternative keys.
+
+
+## 12. What is a Composite Key?
+
+A composite key consists of two or more attributes. Together, they uniquely identify a record it is used when a single attribute is not enough. Common in junction tables.
+
+
+## 13. What is the super key?
+
+A super key is a set of attributes that uniquely identifies  records . It may contain extra attributes. All candidate keys are superkeys. Super keys ensure uniqueness.
+
+
+
+
+## 14. what are the advantages of DBMS?
+DBMS reduces data redundancy and inconsistency. It provides data Security and integrity. It supports concurrent access and backup recovery. DBMS improves data sharing and reliability.
+
+
+## 15.  What is Data Redundancy?
+
+Data redundancy means duplication of data in multiple places. It increases storage cost and inconsistency. DBMS minimizes redundancy using normalization. Less redundancy improves data accuracy.
+
+
+## 16. What is Data Integrity?
+Data integrity ensures accuracy and consistency of data. It is maintained using constraints like primary key and foreign key. Integrity prevents invalid data entry. It is essential for reliable databases.
+
+## 17. What is Data Independence?
+Data Independence means changes in data structure do not affect application programs. it allows modifying the schema without rewriting code. These are logical and physical data independence. It improves system flexibility.
+
+
+## 18. What is Schema?
+
+A schema defines the structure of a database. It includes tables, fields, and relationships. A schema is defined during database design. It acts as a blueprint of the database
+
+## 19. What is an instance?
+
+An instance is the actual data stored in the database at a particular time. It changes frequently with operations. An instance reflects the current state of the database. The schema remains constant compared to the instance.
+
+## 20. What is a Table?
+
+A table  is a collection of related data organized in rows and columns. Each row represents a record. Each column represents an attribute. Tables are basic storage units in DBMS.
+
+
+## 21.  What is Normalization?
+
+Normalization is the process of organizing data to reduce redundancy. It divides tables into smaller related tables. It improves data consistency. Normal forms define normalization rules
+
+
+## 22. What is Denormalization?
+Denormalization is the opposite of normalization. It combines tables to improve performance, and it increases redundancy internationally. Used in read-heavy systems.
+
+## 23. What is 1NF?
+
+First Normal form ensures atomic values in columns. Each column contains single values only. It removes repeating groups. It is the basic level of normalization.
+
+## 24.  What is 2NF?
+Second Normal form removes partial dependency. it requires 1NF compliance. Non-key attributes depend on the full primary key. used mainly with composite keys.
+
+## 25. What is 3NF?
+
+Third Noaml Form removes transitive dependency. It requires 2NF compliance.Non-key attributes depend only on the primary key. It improves data integrity.
+
+## 26. what is BCNF?
+
+BCNF is a stronger form of 3NF. Every  determinant must be a candidate key. It removes anomalies not handled by 3NF. used in advanced normalization.
 
 
 
